@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Crop Recommendation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="/">🌱 SmartCrop</a>
+        <span class="tagline">Data-informed crop suggestions</span>
+    </header>
+
+    <main class="page">
+        <section class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">SMART AGRICULTURE · MACHINE LEARNING</p>
+                <h1>Find a crop that fits<br><span>your farm conditions.</span></h1>
+                <p class="intro">Enter soil nutrients and local environmental measurements to get a crop prediction from your trained ML model.</p>
+            </div>
+            <div class="hero-icon" aria-hidden="true">🌾</div>
+        </section>
+
+        <section class="layout">
+            <form class="panel form-panel" method="POST" action="/">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">STEP 01</p>
+                        <h2>Farm details</h2>
+                    </div>
+                    <span class="pill">7 inputs</span>
+                </div>
+
+                <label class="field">
+                    <span>Nitrogen <small>(N)</small></span>
+                    <input type="number" name="N" min="0" step="any" placeholder="e.g. 90" value="{{ values.get('N', '') }}" required>
+                </label>
+                <label class="field">
+                    <span>Phosphorus <small>(P)</small></span>
+                    <input type="number" name="P" min="0" step="any" placeholder="e.g. 42" value="{{ values.get('P', '') }}" required>
+                </label>
+                <label class="field">
+                    <span>Potassium <small>(K)</small></span>
+                    <input type="number" name="K" min="0" step="any" placeholder="e.g. 43" value="{{ values.get('K', '') }}" required>
+                </label>
+
+                <div class="two-columns">
+                    <label class="field">
+                        <span>Temperature <small>°C</small></span>
+                        <input type="number" name="temperature" step="any" placeholder="e.g. 25" value="{{ values.get('temperature', '') }}" required>
+                    </label>
+                    <label class="field">
+                        <span>Humidity <small>%</small></span>
+                        <input type="number" name="humidity" min="0" max="100" step="any" placeholder="e.g. 80" value="{{ values.get('humidity', '') }}" required>
+                    </label>
+                    <label class="field">
+                        <span>Soil pH</span>
+                        <input type="number" name="ph" min="0" max="14" step="any" placeholder="e.g. 6.5" value="{{ values.get('ph', '') }}" required>
+                    </label>
+                    <label class="field">
+                        <span>Rainfall <small>mm</small></span>
+                        <input type="number" name="rainfall" min="0" step="any" placeholder="e.g. 200" value="{{ values.get('rainfall', '') }}" required>
+                    </label>
+                </div>
+
+                <div class="field">
+                    <span>Choose model</span>
+                    <div class="model-options">
+                        <label class="radio-card">
+                            <input type="radio" name="model" value="random_forest" {% if selected_model == 'random_forest' %}checked{% endif %} {% if not models_available.random_forest %}disabled{% endif %}>
+                            <span><strong>Random Forest</strong><small>{% if models_available.random_forest %}Available{% else %}Model file missing{% endif %}</small></span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="model" value="logistic" {% if selected_model == 'logistic' %}checked{% endif %} {% if not models_available.logistic %}disabled{% endif %}>
+                            <span><strong>Logistic Regression</strong><small>{% if models_available.logistic %}Available{% else %}Model file missing{% endif %}</small></span>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="submit-button" type="submit">Recommend Crop <span>→</span></button>
+                <p class="form-note">Use measurements in the same units and ranges as the model's training data.</p>
+            </form>
+
+            <aside class="panel result-panel">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">STEP 02</p>
+                        <h2>Your result</h2>
+                    </div>
+                    <span class="result-symbol">✳</span>
+                </div>
+
+                {% if prediction %}
+                    <div class="result-content">
+                        <div class="crop-illustration">🌱</div>
+                        <p class="result-label">PREDICTED CROP</p>
+                        <h3>{{ prediction | title }}</h3>
+                        <p class="result-description">Your selected model predicts this crop label based on the values you entered.</p>
+                        <div class="result-meta">
+                            <span>Model used</span>
+                            <strong>{% if selected_model == 'random_forest' %}Random Forest{% else %}Logistic Regression{% endif %}</strong>
+                        </div>
+                    </div>
+                {% elif error %}
+                    <div class="error-box">
+                        <strong>Could not make a prediction</strong>
+                        <p>{{ error }}</p>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-illustration">🌿</div>
+                        <h3>Ready when you are</h3>
+                        <p>Fill in your farm details and submit the form. Your predicted crop will appear here.</p>
+                        <ul>
+                            <li>Enter all seven measurements</li>
+                            <li>Select a trained model</li>
+                            <li>View the predicted crop</li>
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <div class="notice">
+                    <strong>Important note</strong>
+                    <p>This is a machine-learning prediction based on the training dataset, not a guarantee of crop yield or suitability. Real farm decisions should also consider location, season, soil testing and local agricultural advice.</p>
+                </div>
+            </aside>
+        </section>
+        <footer>SmartCrop · Student machine learning project</footer>
+    </main>
+</body>
+</html>
