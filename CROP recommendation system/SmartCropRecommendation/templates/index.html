@@ -64,20 +64,6 @@
                     </label>
                 </div>
 
-                <div class="field">
-                    <span>Choose model</span>
-                    <div class="model-options">
-                        <label class="radio-card">
-                            <input type="radio" name="model" value="random_forest" {% if selected_model == 'random_forest' %}checked{% endif %} {% if not models_available.random_forest %}disabled{% endif %}>
-                            <span><strong>Random Forest</strong><small>{% if models_available.random_forest %}Available{% else %}Model file missing{% endif %}</small></span>
-                        </label>
-                        <label class="radio-card">
-                            <input type="radio" name="model" value="logistic" {% if selected_model == 'logistic' %}checked{% endif %} {% if not models_available.logistic %}disabled{% endif %}>
-                            <span><strong>Logistic Regression</strong><small>{% if models_available.logistic %}Available{% else %}Model file missing{% endif %}</small></span>
-                        </label>
-                    </div>
-                </div>
-
                 <button class="submit-button" type="submit">Recommend Crop <span>→</span></button>
                 <p class="form-note">Use measurements in the same units and ranges as the model's training data.</p>
             </form>
@@ -96,10 +82,10 @@
                         <div class="crop-illustration">🌱</div>
                         <p class="result-label">PREDICTED CROP</p>
                         <h3>{{ prediction | title }}</h3>
-                        <p class="result-description">Your selected model predicts this crop label based on the values you entered.</p>
+                        <p class="result-description">The trained crop model predicts this label based on the values you entered.</p>
                         <div class="result-meta">
                             <span>Model used</span>
-                            <strong>{% if selected_model == 'random_forest' %}Random Forest{% else %}Logistic Regression{% endif %}</strong>
+                            <strong>Best crop model</strong>
                         </div>
                     </div>
                 {% elif error %}
@@ -114,16 +100,12 @@
                         <p>Fill in your farm details and submit the form. Your predicted crop will appear here.</p>
                         <ul>
                             <li>Enter all seven measurements</li>
-                            <li>Select a trained model</li>
+                            <li>Submit the farm details</li>
                             <li>View the predicted crop</li>
                         </ul>
                     </div>
                 {% endif %}
 
-                <div class="notice">
-                    <strong>Important note</strong>
-                    <p>This is a machine-learning prediction based on the training dataset, not a guarantee of crop yield or suitability. Real farm decisions should also consider location, season, soil testing and local agricultural advice.</p>
-                </div>
             </aside>
         </section>
         <footer>SmartCrop · Student machine learning project</footer>

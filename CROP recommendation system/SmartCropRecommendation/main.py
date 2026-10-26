@@ -7,32 +7,23 @@ import pandas as pd
 from flask import Flask, jsonify, render_template, request
 
 BASE_DIR = Path(__file__).resolve().parent
-MODEL_DIR = BASE_DIR / "models"
+MODEL_PATH = BASE_DIR / "models" / "best_crop_model.pkl"
 
 app = Flask(__name__)
 
-# Put your saved model files in the models/ folder.
-# These filenames must match the files you actually saved.
-rf_path = MODEL_DIR / "random_forest_model.pkl"
-lr_path = MODEL_DIR / "logistic_model.pkl"
-
-rf_model = joblib.load(rf_path) if rf_path.exists() else None
-lr_model = joblib.load(lr_path) if lr_path.exists() else None
+model = joblib.load(MODEL_PATH) if MODEL_PATH.exists() else None
 
 FEATURES = ["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]
-MODEL_NAMES = {"random_forest", "logistic"}
 
 
 @app.get("/health")
 def health():
-    models_ready = rf_model is not None and lr_model is not None
+    model_ready = model is not None
     return jsonify(
-        status="ok" if models_ready else "degraded",
-        models={
-            "random_forest": rf_model is not None,
-            "logistic": lr_model is not None,
-        },
-    ), 200 if models_ready else 503
+        status="ok" if model_ready else "degraded",
+        model="best_crop_model.pkl",
+        model_available=model_ready,
+    ), 200 if model_ready else 503
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -40,13 +31,9 @@ def index():
     prediction = None
     error = None
     values = {}
-    selected_model = request.form.get("model", "random_forest")
 
     if request.method == "POST":
         try:
-            if selected_model not in MODEL_NAMES:
-                raise ValueError("Please select one of the available models.")
-
             values = {
                 "N": float(request.form["N"]),
                 "P": float(request.form["P"]),
@@ -66,10 +53,9 @@ def index():
             if not 0 <= values["ph"] <= 14:
                 raise ValueError("Soil pH must be between 0 and 14.")
 
-            model = rf_model if selected_model == "random_forest" else lr_model
             if model is None:
                 raise FileNotFoundError(
-                    "The selected model file was not found. Add your saved .pkl file to the models/ folder."
+                    "The model file was not found. Add models/best_crop_model.pkl to the project."
                 )
 
             input_df = pd.DataFrame([[values[f] for f in FEATURES]], columns=FEATURES)
@@ -86,17 +72,11 @@ def index():
                 f"Details: {exc}"
             )
 
-    models_available = {
-        "random_forest": rf_model is not None,
-        "logistic": lr_model is not None,
-    }
     return render_template(
         "index.html",
         prediction=prediction,
         error=error,
         values=values,
-        selected_model=selected_model,
-        models_available=models_available,
     )
 
 
