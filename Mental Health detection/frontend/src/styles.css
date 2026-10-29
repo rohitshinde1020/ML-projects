@@ -1,0 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; }
+body { margin: 0; }
+.field { @apply w-full rounded-xl border border-ink/10 bg-sand/60 px-4 py-3 text-sm text-ink outline-none transition focus:border-moss focus:ring-2 focus:ring-moss/15; }
