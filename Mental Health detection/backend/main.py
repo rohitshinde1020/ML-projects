@@ -13,48 +13,29 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-#what is logging? Logging is a built-in Python module that provides a flexible framework for emitting log messages from Python programs. It allows developers to track events that happen during the execution of a program, which can be useful for debugging and monitoring the application's behavior. The logging module supports different log levels (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL) and can be configured to output log messages to various destinations, such as the console, files, or external logging systems.
+#what is logging? Logging is a built-in Python module that provides a flexible framework for emitting log messages from Python programs. 
+#It allows developers to track events that happen during the execution of a program, which can be useful for debugging and monitoring the application's behavior. The logging module supports different log levels (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL) and can be configured to output log messages to various destinations, such as the console, files, or external logging systems.
 #what is logging.getLogger("mental-health-api")? It creates a logger object with the name "mental-health-api" that can be used to log messages for this specific application. The logger can be configured to log messages at different levels (e.g., DEBUG, INFO, WARNING, ERROR) and can be used to track the application's behavior and diagnose issues.
 
 logger = logging.getLogger("mental-health-api")
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
+BASE_DIR = Path(__file__).resolve().parent
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-MODEL_PATH = Path(os.getenv("MODEL_PATH", str(BASE_DIR / "Mental_Health_Model.pkl")))
-TOP_COUNTRIES = {
-    "Other",
-    "India",
-    "USA",
-    "Canada",
-    "Australia",
-    "UK",
-    "Germany",
-    "Mexico",
-    "Turkey",
-    "France",
-}
+MODEL_PATH = Path(
+    os.getenv("MODEL_PATH", str(BASE_DIR / "Mental_Health_Model.pkl"))
+)
 
+TOP_COUNTRIES = {"Other","India","USA","Canada","Australia","UK","Germany","Mexico","Turkey","France"}
 Gender = Literal["Female", "Male"]
 AcademicLevel = Literal["Graduate", "High School", "Undergraduate"]
-Platform = Literal[
-    "Facebook",
-    "Instagram",
-    "KakaoTalk",
-    "LINE",
-    "LinkedIn",
-    "Snapchat",
-    "TikTok",
-    "Twitter",
-    "VKontakte",
-    "WeChat",
-    "WhatsApp",
-    "YouTube",
-]
+Platform = Literal["Facebook","Instagram","KakaoTalk","LINE","LinkedIn","Snapchat","TikTok","Twitter","VKontakte","WeChat","WhatsApp","YouTube",]
 Purpose = Literal["Education", "Entertainment", "Networking", "News"]
 StressLevel = Literal["Low", "Medium", "High", "Very High"]
 
-
 class PredictionRequest(BaseModel):
+    #model_config is a configuration dictionary for the Pydantic model. 
+    #The extra="forbid" setting means that any extra fields not defined in the model will be rejected during validation. 
+    #This helps ensure that only the specified fields are accepted in the request payload, preventing unexpected or unwanted data from being processed.
     model_config = ConfigDict(extra="forbid")
 
     age: Annotated[int, Field(gt=0, le=120)]
@@ -70,6 +51,7 @@ class PredictionRequest(BaseModel):
     sleep_hours_per_night: Annotated[float, Field(ge=0, le=24)]
     stress_level: StressLevel
 
+    #field_validator is a decorator provided by Pydantic that allows you to define custom validation logic for specific fields in a Pydantic model.
     @field_validator(
         "avg_daily_usage_hours",
         "study_hours",
@@ -86,6 +68,7 @@ class PredictionRequest(BaseModel):
 class PredictionResponse(BaseModel):
     score: float
     target: str = "Mental_Health_Score"
+    # The interpretation field provides a human-readable explanation of the prediction.
     interpretation: str = (
         "A model-estimated Mental_Health_Score based on the provided inputs."
     )

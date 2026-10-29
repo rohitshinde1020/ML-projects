@@ -10,4 +10,5 @@ ENV MODEL_PATH=/app/Mental_Health_Model.pkl
 ENV CORS_ORIGINS=http://localhost:5173
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+#CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"] in case of running the container in production, you can use a production-ready server like Gunicorn or Uvicorn with multiple workers. 
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"] 
